@@ -1,1 +1,85 @@
-<p>hello word</p>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Tài khoản Ngân hàng</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-university"></i> Quản lý Tài khoản Ngân hàng</h1>
+            <p>Danh sách tài khoản đã đăng ký</p>
+        </header>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm tài khoản, họ tên...">
+            </div>
+            <div class="stats">
+                <span id="totalAccounts">0</span> tài khoản
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="accountsTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tài khoản</th>
+                        <th>Mật khẩu</th>
+                        <th>Họ tên</th>
+                        <th>Trạng thái</th>
+                        <th>Thưởng</th>
+                        <th>Thời gian</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsBody">
+                    <!-- Dữ liệu sẽ được load bằng JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Đang tải dữ liệu...</p>
+        </div>
+
+        <div class="no-data" id="noData" style="display: none;">
+            <i class="fas fa-inbox"></i>
+            <p>Không tìm thấy tài khoản nào</p>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Đã sao chép thành công!</span>
+    </div>
+
+    <!-- Modal xem chi tiết -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chi tiết tài khoản</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Nội dung chi tiết -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="copyAllInfo()">
+                    <i class="fas fa-copy"></i> Sao chép tất cả
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
