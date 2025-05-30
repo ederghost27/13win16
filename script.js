@@ -2,7 +2,7 @@
 let accountsData = [];
 let filteredData = [];
 let currentAccount = null;
-let currentFileName = 'accounts_export_20250530_004500.txt';
+let currentFileName = 'https://ederghost27.github.io/13win16/accounts_20250530_090003.txt';
 let fileMetadata = {};
 
 // Khởi tạo khi trang load
