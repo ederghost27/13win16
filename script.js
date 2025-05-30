@@ -137,6 +137,8 @@ async function refreshData() {
 
 // Parse dữ liệu từ text
 function parseAccountsData(text) {
+    console.log('Raw text:', text.substring(0, 500)); // Debug: xem text thô
+
     const accounts = [];
     const lines = text.split('\n');
     let currentAccount = {};
@@ -147,45 +149,85 @@ function parseAccountsData(text) {
         title: ''
     };
 
+    console.log('Total lines:', lines.length); // Debug: số dòng
+
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
+        console.log(`Line ${i}: "${line}"`); // Debug: xem từng dòng
 
         // Parse metadata từ header
         if (line.includes('DANH SÁCH TÀI KHOẢN')) {
             metadata.title = line;
+            console.log('Found title:', line);
         } else if (line.startsWith('Thời gian xuất:')) {
             metadata.exportTime = line.replace('Thời gian xuất:', '').trim();
+            console.log('Found export time:', metadata.exportTime);
         } else if (line.startsWith('Tổng số tài khoản:')) {
             metadata.totalAccounts = parseInt(line.replace('Tổng số tài khoản:', '').trim()) || 0;
+            console.log('Found total accounts:', metadata.totalAccounts);
         }
         // Parse account data
         else if (line.match(/^\d+\./)) {
             // Bắt đầu tài khoản mới
             if (Object.keys(currentAccount).length > 0) {
+                console.log('🔥 Adding account:', currentAccount); // Debug
                 accounts.push(currentAccount);
             }
             currentAccount = {};
             accountNumber++;
             currentAccount.stt = accountNumber;
+            console.log('🆕 Starting account #', accountNumber, 'from line:', line); // Debug
+
+            // Kiểm tra nếu dòng này cũng chứa thông tin tài khoản (format: "1. Tài khoản: username")
+            if (line.includes('Tài khoản:')) {
+                const parts = line.split('Tài khoản:');
+                console.log('🔍 Same line account parts:', parts);
+                const username = parts[1]?.trim();
+                currentAccount.username = username;
+                console.log('✅ Found username (same line):', `"${username}"`);
+            }
         } else if (line.includes('Tài khoản:')) {
-            currentAccount.username = line.split('Tài khoản:')[1].trim();
+            const parts = line.split('Tài khoản:');
+            console.log('🔍 Account line parts:', parts);
+            const username = parts[1]?.trim();
+            currentAccount.username = username;
+            console.log('✅ Found username:', `"${username}"`); // Debug với quotes
         } else if (line.includes('Mật khẩu:')) {
-            currentAccount.password = line.split('Mật khẩu:')[1].trim();
+            const parts = line.split('Mật khẩu:');
+            console.log('🔍 Password line parts:', parts);
+            const password = parts[1]?.trim();
+            currentAccount.password = password;
+            console.log('✅ Found password:', `"${password}"`); // Debug với quotes
         } else if (line.includes('Họ tên:')) {
-            currentAccount.fullName = line.split('Họ tên:')[1].trim();
+            const parts = line.split('Họ tên:');
+            console.log('🔍 Name line parts:', parts);
+            const fullName = parts[1]?.trim();
+            currentAccount.fullName = fullName;
+            console.log('✅ Found fullName:', `"${fullName}"`); // Debug với quotes
         } else if (line.includes('Trạng thái:')) {
-            currentAccount.status = line.split('Trạng thái:')[1].trim();
+            const status = line.split('Trạng thái:')[1]?.trim();
+            currentAccount.status = status;
+            console.log('✅ Found status:', `"${status}"`);
         } else if (line.includes('Thưởng:')) {
-            currentAccount.reward = line.split('Thưởng:')[1].trim();
+            const reward = line.split('Thưởng:')[1]?.trim();
+            currentAccount.reward = reward;
+            console.log('✅ Found reward:', `"${reward}"`);
         } else if (line.includes('Thời gian:')) {
-            currentAccount.time = line.split('Thời gian:')[1].trim();
+            const time = line.split('Thời gian:')[1]?.trim();
+            currentAccount.time = time;
+            console.log('✅ Found time:', `"${time}"`);
+        } else if (line.length > 0) {
+            console.log('❓ Unmatched line:', `"${line}"`);
         }
     }
 
     // Thêm tài khoản cuối cùng
     if (Object.keys(currentAccount).length > 0) {
+        console.log('Adding final account:', currentAccount); // Debug
         accounts.push(currentAccount);
     }
+
+    console.log('Final accounts array:', accounts); // Debug
 
     return {
         accounts: accounts,
@@ -205,33 +247,47 @@ function renderAccountsTable() {
 
     showNoData(false);
 
-    tbody.innerHTML = filteredData.map(account => `
+    tbody.innerHTML = filteredData.map(account => {
+        // Debug: log từng account
+        console.log('Rendering account:', account);
+
+        // Đảm bảo các giá trị không undefined
+        const stt = account.stt || 'N/A';
+        const username = account.username || 'undefined';
+        const password = account.password || '';
+        const fullName = account.fullName || '';
+        const status = account.status || '';
+        const reward = account.reward || '';
+        const time = account.time || '';
+
+        return `
         <tr>
-            <td>${account.stt}</td>
-            <td class="account-info">${account.username}</td>
+            <td>${stt}</td>
+            <td class="account-info">${username}</td>
             <td>
-                <input type="password" class="password-field" value="${account.password}" readonly>
+                <input type="password" class="password-field" value="${password}" readonly>
                 <button class="btn btn-copy" onclick="togglePassword(this)" title="Hiện/Ẩn mật khẩu">
                     <i class="fas fa-eye"></i>
                 </button>
             </td>
-            <td>${account.fullName}</td>
-            <td><span class="status-success">${account.status}</span></td>
-            <td><span class="reward">${account.reward}</span></td>
-            <td>${formatDateTime(account.time)}</td>
+            <td>${fullName}</td>
+            <td><span class="status-success">${status}</span></td>
+            <td><span class="reward">${reward}</span></td>
+            <td>${formatDateTime(time)}</td>
             <td>
-                <button class="btn btn-copy" onclick="copyAccount('${account.username}')" title="Sao chép tài khoản">
+                <button class="btn btn-copy" onclick="copyAccount('${username}')" title="Sao chép tài khoản">
                     <i class="fas fa-copy"></i>
                 </button>
-                <button class="btn btn-copy" onclick="copyPassword('${account.password}')" title="Sao chép mật khẩu">
+                <button class="btn btn-copy" onclick="copyPassword('${password}')" title="Sao chép mật khẩu">
                     <i class="fas fa-key"></i>
                 </button>
-                <button class="btn btn-detail" onclick="showDetail(${account.stt})" title="Xem chi tiết">
+                <button class="btn btn-detail" onclick="showDetail(${stt})" title="Xem chi tiết">
                     <i class="fas fa-info-circle"></i>
                 </button>
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Tìm kiếm
