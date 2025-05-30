@@ -50,6 +50,8 @@ header p {
     padding: 25px 30px;
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .search-box {
@@ -87,6 +89,66 @@ header p {
     padding: 10px 20px;
     border-radius: 20px;
     font-weight: 600;
+}
+
+.upload-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: -9999px;
+}
+
+.btn-upload {
+    background: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-upload:hover {
+    background: #229954;
+    transform: translateY(-1px);
+}
+
+.btn-refresh {
+    background: #f39c12;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-refresh:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
+.file-name {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-style: italic;
 }
 
 .table-container {
@@ -325,29 +387,29 @@ tbody tr:hover {
         margin: 10px;
         border-radius: 10px;
     }
-    
+
     header h1 {
         font-size: 1.8rem;
     }
-    
+
     .controls {
         flex-direction: column;
         gap: 15px;
         align-items: stretch;
     }
-    
+
     .search-box {
         max-width: none;
     }
-    
+
     table {
         font-size: 0.85rem;
     }
-    
+
     th, td {
         padding: 10px 8px;
     }
-    
+
     .btn {
         padding: 6px 10px;
         font-size: 0.8rem;
