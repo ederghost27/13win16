@@ -19,6 +19,18 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Tìm kiếm tài khoản, họ tên...">
             </div>
+            <div class="upload-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept=".txt" />
+                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-upload"></i> Cập nhật file
+                    </button>
+                </div>
+                <button class="btn-refresh" onclick="refreshData()" title="Làm mới dữ liệu">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <div class="file-name" id="fileName">accounts_export_20250530_004500.txt</div>
+            </div>
             <div class="stats">
                 <span id="totalAccounts">0</span> tài khoản
             </div>
