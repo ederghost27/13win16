@@ -3,6 +3,7 @@ let accountsData = [];
 let filteredData = [];
 let currentAccount = null;
 let currentFileName = 'accounts_export_20250530_004500.txt';
+let fileMetadata = {};
 
 // Khởi tạo khi trang load
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,7 +44,9 @@ async function loadAccountsData(fileName = null) {
         const text = await response.text();
 
         // Parse dữ liệu
-        accountsData = parseAccountsData(text);
+        const parseResult = parseAccountsData(text);
+        accountsData = parseResult.accounts;
+        fileMetadata = parseResult.metadata;
         filteredData = [...accountsData];
 
         // Cập nhật tên file hiển thị
@@ -55,6 +58,7 @@ async function loadAccountsData(fileName = null) {
         // Hiển thị dữ liệu
         renderAccountsTable();
         updateStats();
+        updateFileInfo();
 
         showLoading(false);
         showToast(`Đã tải thành công ${accountsData.length} tài khoản từ ${fileToLoad}`);
@@ -83,16 +87,17 @@ async function handleFileUpload(event) {
         const text = await readFileAsText(file);
 
         // Parse dữ liệu
-        const newAccountsData = parseAccountsData(text);
+        const parseResult = parseAccountsData(text);
 
-        if (newAccountsData.length === 0) {
+        if (parseResult.accounts.length === 0) {
             showError('File không chứa dữ liệu tài khoản hợp lệ');
             showLoading(false);
             return;
         }
 
         // Cập nhật dữ liệu
-        accountsData = newAccountsData;
+        accountsData = parseResult.accounts;
+        fileMetadata = parseResult.metadata;
         filteredData = [...accountsData];
         currentFileName = file.name;
 
@@ -100,6 +105,7 @@ async function handleFileUpload(event) {
         document.getElementById('fileName').textContent = file.name;
         renderAccountsTable();
         updateStats();
+        updateFileInfo();
 
         showLoading(false);
         showToast(`Đã cập nhật thành công ${accountsData.length} tài khoản từ ${file.name}`);
@@ -135,11 +141,25 @@ function parseAccountsData(text) {
     const lines = text.split('\n');
     let currentAccount = {};
     let accountNumber = 0;
+    const metadata = {
+        exportTime: '',
+        totalAccounts: 0,
+        title: ''
+    };
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
 
-        if (line.match(/^\d+\./)) {
+        // Parse metadata từ header
+        if (line.includes('DANH SÁCH TÀI KHOẢN')) {
+            metadata.title = line;
+        } else if (line.startsWith('Thời gian xuất:')) {
+            metadata.exportTime = line.replace('Thời gian xuất:', '').trim();
+        } else if (line.startsWith('Tổng số tài khoản:')) {
+            metadata.totalAccounts = parseInt(line.replace('Tổng số tài khoản:', '').trim()) || 0;
+        }
+        // Parse account data
+        else if (line.match(/^\d+\./)) {
             // Bắt đầu tài khoản mới
             if (Object.keys(currentAccount).length > 0) {
                 accounts.push(currentAccount);
@@ -147,18 +167,18 @@ function parseAccountsData(text) {
             currentAccount = {};
             accountNumber++;
             currentAccount.stt = accountNumber;
-        } else if (line.startsWith('Tài khoản:')) {
-            currentAccount.username = line.replace('Tài khoản:', '').trim();
-        } else if (line.startsWith('Mật khẩu:')) {
-            currentAccount.password = line.replace('Mật khẩu:', '').trim();
-        } else if (line.startsWith('Họ tên:')) {
-            currentAccount.fullName = line.replace('Họ tên:', '').trim();
-        } else if (line.startsWith('Trạng thái:')) {
-            currentAccount.status = line.replace('Trạng thái:', '').trim();
-        } else if (line.startsWith('Thưởng:')) {
-            currentAccount.reward = line.replace('Thưởng:', '').trim();
-        } else if (line.startsWith('Thời gian:')) {
-            currentAccount.time = line.replace('Thời gian:', '').trim();
+        } else if (line.includes('Tài khoản:')) {
+            currentAccount.username = line.split('Tài khoản:')[1].trim();
+        } else if (line.includes('Mật khẩu:')) {
+            currentAccount.password = line.split('Mật khẩu:')[1].trim();
+        } else if (line.includes('Họ tên:')) {
+            currentAccount.fullName = line.split('Họ tên:')[1].trim();
+        } else if (line.includes('Trạng thái:')) {
+            currentAccount.status = line.split('Trạng thái:')[1].trim();
+        } else if (line.includes('Thưởng:')) {
+            currentAccount.reward = line.split('Thưởng:')[1].trim();
+        } else if (line.includes('Thời gian:')) {
+            currentAccount.time = line.split('Thời gian:')[1].trim();
         }
     }
 
@@ -167,7 +187,10 @@ function parseAccountsData(text) {
         accounts.push(currentAccount);
     }
 
-    return accounts;
+    return {
+        accounts: accounts,
+        metadata: metadata
+    };
 }
 
 // Hiển thị bảng tài khoản
@@ -228,6 +251,29 @@ function handleSearch() {
 // Cập nhật thống kê
 function updateStats() {
     document.getElementById('totalAccounts').textContent = filteredData.length;
+}
+
+// Cập nhật thông tin file
+function updateFileInfo() {
+    const fileInfoDiv = document.getElementById('fileInfo');
+    const exportTimeSpan = document.getElementById('exportTime');
+    const totalInFileSpan = document.getElementById('totalInFile');
+    const headerSubtitle = document.getElementById('headerSubtitle');
+
+    if (fileMetadata.exportTime || fileMetadata.totalAccounts > 0) {
+        // Hiển thị thông tin metadata nếu có
+        fileInfoDiv.style.display = 'flex';
+        exportTimeSpan.textContent = fileMetadata.exportTime || '-';
+        totalInFileSpan.textContent = fileMetadata.totalAccounts || accountsData.length;
+
+        if (fileMetadata.title) {
+            headerSubtitle.textContent = fileMetadata.title;
+        }
+    } else {
+        // Ẩn thông tin metadata nếu không có
+        fileInfoDiv.style.display = 'none';
+        headerSubtitle.textContent = 'Danh sách tài khoản đã đăng ký';
+    }
 }
 
 // Sao chép tài khoản
