@@ -43,6 +43,28 @@ header p {
     opacity: 0.9;
 }
 
+.file-info {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.info-item i {
+    color: #3498db;
+}
+
 .controls {
     display: flex;
     justify-content: space-between;
